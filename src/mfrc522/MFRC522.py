@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+from gpiozero import OutputDevice
 import spidev
 import logging
 import time
@@ -115,8 +116,8 @@ class MFRC522:
         - bus (int): the SPI bus number (default 0).
         - device (int): the SPI device number (default 0).
         - spd (int): the SPI bus speed (default 1000000).
-        - pin_mode (int): the GPIO pin numbering mode (default 10).
-        - pin_rst (int): the GPIO pin number for reset (default -1, which sets the pin based on pin_mode).
+        - pin_mode (int): the GPIO pin numbering mode (default 10). 10 corresponds to BOARD numbering, and 11 corresponds to gpiozero pin numbering. 
+        - pin_rst (int): the GPIO pin number for reset (default -1, which sets the pin based on pin_mode). 
         - debugLevel (str): the logging debug level (default 'WARNING').
         """
         # Initialize SPI communication
@@ -130,25 +131,21 @@ class MFRC522:
         level = logging.getLevelName(debugLevel)
         self.logger.setLevel(level)
 
-        # Set GPIO pin numbering mode if not already set
-        gpioMode = GPIO.getmode()
-
-        if gpioMode is None:
-            GPIO.setmode(pin_mode)
-        else:
-            pin_mode = gpioMode
-
         # Set reset pin based on pin_mode if not specified
+
         if pin_rst == -1:
             if pin_mode == 11:
-                pin_rst = 25
+                pin_rst = 'GPIO25'
             else:
-                pin_rst = 22
+                pin_rst = 'BOARD22'
+        elif pin_mode == 10:
+            pin_rst = f"BOARD{pin_rst}"
 
         self.StopAuth = self.StopCrypto1
         # Set up reset pin and initialize MFRC522 RFID reader
-        GPIO.setup(pin_rst, GPIO.OUT)
-        GPIO.output(pin_rst, 1)
+
+        resetpin = OutputDevice(pin_rst)
+        resetpin.on()
         self.Init()
 
     def Reset(self):

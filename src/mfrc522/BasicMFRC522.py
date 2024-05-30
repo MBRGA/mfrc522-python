@@ -9,14 +9,18 @@ class BasicMFRC522:
         MFRC522 (module): The MFRC522 module used for communication with the RFID reader.
         KEY (list): The default authentication key used for reading and writing data.
     """
-    def __init__(self, KEY=[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]):
+    def __init__(self, KEY=[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF], mfrc522 = None):
         """
         Initializes a BasicMFRC522 instance.
 
         Args:
             KEY (list): The authentication key used for reading and writing data.
+            mfrc522: An existing instance of MFRC522 class to wrap with BasicMFRC522
         """
-        self.MFRC522 = MFRC522()  # Create an instance of the MFRC522 class
+        if mfrc522 is None:
+            self.MFRC522 = MFRC522()  # Create an instance of the MFRC522 class
+        else:
+            self.MFRC522 = mfrc522
         self.KEY = KEY  # Set the authentication key
 
     def read_sector(self, trailer_block):
